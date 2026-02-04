@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>STEPS Technical Appendix</title>
+  <style>
+    :root{
+      --wb-blue:#003B71;
+      --wb-light:#F3F6FA;
+      --wb-text:#1B1F23;
+      --wb-muted:#5B6770;
+      --wb-border:#D7DEE8;
+    }
+    body{
+      margin:0;
+      padding:0;
+      font-family:"World Bank Group","Open Sans","Calibri","Arial",sans-serif;
+      color:var(--wb-text);
+      background:white;
+      line-height:1.55;
+    }
+    header{
+      background:var(--wb-blue);
+      color:white;
+      padding:28px 22px;
+    }
+    header h1{margin:0;font-size:22px;font-weight:700;}
+    header p{margin:8px 0 0 0;opacity:0.95;max-width:980px}
+    main{padding:22px;max-width:1100px;margin:0 auto;}
+    h2{color:var(--wb-blue);margin-top:28px;font-size:18px}
+    h3{margin-top:18px;font-size:15px}
+    p{margin:10px 0}
+    .box{
+      background:var(--wb-light);
+      border:1px solid var(--wb-border);
+      border-radius:10px;
+      padding:14px 14px;
+      margin:14px 0;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin:10px 0 18px 0;
+      font-size:13px;
+    }
+    th,td{
+      border:1px solid var(--wb-border);
+      padding:8px 10px;
+      vertical-align:top;
+    }
+    th{background:#FAFBFD;text-align:left}
+    .muted{color:var(--wb-muted)}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>STEPS (Scalable Training Estimation and Planning System): Technical Appendix</h1>
+    <p>
+      This appendix explains how STEPS converts user inputs into training outputs, economic costs, epidemiological benefits,
+      benefit cost ratios, feasibility checks, national simulations, scenario rankings, and exports. It is written for non-technical
+      stakeholders and programme decision makers. Where formulas are shown, each variable is defined in plain language.
+    </p>
+  </header>
+
+  <main>
+    <div class="box">
+      <p><strong>Key distinction used throughout STEPS</strong></p>
+      <p>
+        STEPS reports both <strong>financial costs</strong> (cash expenditures that require a budget) and <strong>economic costs</strong>
+        (financial costs plus the value of time diverted from regular duties). Economic costs are used when computing net benefits
+        and benefit cost ratios, because they reflect the full resource cost to society.
+      </p>
+    </div>
+
+    <h2>1. Tool structure and recommended workflow</h2>
+    <p>
+      STEPS is organised into tabs that follow the decision workflow. The recommended sequence is:
+      first set global parameters in <strong>Settings</strong>, then configure one programme tier in <strong>Configuration</strong>,
+      review results, save scenarios in <strong>Saved Scenarios</strong>, compare baseline and scenarios in <strong>National simulation</strong>,
+      and finally use <strong>Planner</strong> and <strong>Copilot prompts</strong> to prepare decision ready summaries.
+    </p>
+
+    <h3>1.1 Settings tab</h3>
+    <p>
+      The Settings tab contains parameters that apply across the tool, such as unit costs, benefit inputs, and salary inputs for
+      opportunity cost. These parameters are editable so analysts can align STEPS to updated programme budgets or alternative benefit assumptions.
+    </p>
+
+    <h3>1.2 Configuration tab</h3>
+    <p>
+      The Configuration tab defines a scenario for one selected training tier and modality. A scenario is a complete set of inputs
+      that describes how many cohorts will run, how many trainees per cohort, the programme duration and contact days, and support inputs
+      such as faculty and coordination requirements.
+    </p>
+
+    <h3>1.3 Results summary within Configuration</h3>
+    <p>
+      After clicking <strong>Apply configuration</strong>, STEPS computes outputs for the current scenario. These include graduates,
+      financial cost, existing opportunity cost, salary based opportunity cost, total economic cost, epidemiological benefit, net benefit, and BCR.
+      These outputs are produced from the same formulas used in national simulation and exports.
+    </p>
+
+    <h3>1.4 Saved Scenarios tab</h3>
+    <p>
+      The Saved Scenarios tab stores scenarios so they can be ranked, exported, and compared over time. Saving a scenario does not change any calculations.
+      It only records the scenario configuration and the computed outputs.
+    </p>
+
+    <h3>1.5 National simulation tab</h3>
+    <p>
+      The National simulation tab compares a fixed baseline to a selected scenario. The baseline is anchored to the Planner baseline settings
+      and is not overwritten by scenario selection. This tab also tracks progress toward the target stock of Intermediate and Advanced field epidemiologists.
+    </p>
+
+    <h3>1.6 Planner tab</h3>
+    <p>
+      The Planner tab sets the stock target, current stock, and baseline assumptions. It also provides a pathway view that helps users interpret
+      how many graduates are needed per year to close the gap. Importantly, the Planner defines the reference baseline used elsewhere.
+    </p>
+
+    <h3>1.7 Copilot prompts tab</h3>
+    <p>
+      The Copilot prompts tab generates copy ready prompts for Microsoft Copilot and ChatGPT. The prompts pull live values from the tool, including
+      baseline and scenario deltas, and format them as policy brief inputs.
+    </p>
+
+    <h2>2. Baseline logic and what “fixed baseline” means</h2>
+    <p>
+      STEPS uses a baseline (business as usual) as the counterfactual. The baseline is defined in the Planner baseline section.
+      It is intended to capture current programme operation if no new scale up decision is taken.
+    </p>
+
+    <div class="box">
+      <p><strong>Baseline is fixed in comparisons</strong></p>
+      <p>
+        In National simulation, the baseline values shown in the Baseline column always come from the Planner baseline settings for the selected horizon.
+        Selecting a scenario never overwrites baseline values. Baseline values only change when the user explicitly edits baseline inputs in the Planner.
+      </p>
+    </div>
+
+    <h3>2.1 Stock target, current stock, and the baseline gap</h3>
+    <p>
+      The Planner sets two key numbers for Intermediate and Advanced field epidemiologists:
+      <strong>Target stock</strong> and <strong>Current stock</strong>. The baseline gap is defined as:
+    </p>
+
+    <p class="mono"><strong>Gap to target = Target stock − Current stock</strong></p>
+
+    <p>
+      This gap is the baseline “Remaining to reach target (Intermediate + Advanced)” shown in National simulation. The baseline gap does not depend on
+      the number of graduates produced in the baseline period. It is a stock gap anchored to the current workforce.
+    </p>
+
+    <h2>3. Graduates and accumulation over time</h2>
+    <p>
+      For each scenario, STEPS computes graduates as cohorts multiplied by trainees per cohort multiplied by an endorsement or completion rate.
+      Endorsement is used as a practical proxy for trainees who complete and are recognised by the system.
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Quantity</th>
+          <th>Meaning in STEPS</th>
+          <th>Where it appears</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Graduates per cohort</td>
+          <td>Trainees per cohort × endorsement rate</td>
+          <td>Scenario results, Saved Scenarios, National simulation</td>
+        </tr>
+        <tr>
+          <td>Graduates all cohorts</td>
+          <td>Graduates per cohort × number of cohorts</td>
+          <td>Scenario results, Saved Scenarios, National simulation</td>
+        </tr>
+        <tr>
+          <td>Cumulative Intermediate + Advanced</td>
+          <td>Total Intermediate graduates + total Advanced graduates</td>
+          <td>Planner, National simulation target tracking</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>3.1 Worked example: graduates</h3>
+    <p>
+      Suppose a scenario runs 10 cohorts of Intermediate training, each with 40 trainees, and endorsement is 85%.
+      Graduates per cohort are 40 × 0.85 = 34. Total graduates are 34 × 10 = 340. If this is Intermediate tier, then Intermediate + Advanced is also 340.
+    </p>
+
+    <h2>4. Financial costs</h2>
+    <p>
+      Financial costs are the cash resources needed to deliver the programme. They include items such as training delivery, materials,
+      travel and per diems where applicable, mentoring support costs, and other cash inputs defined in Settings.
+    </p>
+
+    <p class="mono"><strong>Financial cost (per cohort) = Sum of unit costs × required quantities</strong></p>
+
+    <p>
+      The specific unit costs and quantities are visible in the Settings and Configuration tabs. Where a quantity is tier specific, it is driven by
+      programme duration and contact days.
+    </p>
+
+    <h2>5. Opportunity costs (economic costs)</h2>
+    <p>
+      STEPS reports two opportunity cost methods. Both are included in the Total economic cost. They are reported separately so users can see
+      how much of the economic cost is driven by time diversion assumptions.
+    </p>
+
+    <h3>5.1 Existing opportunity cost</h3>
+    <p>
+      The tool preserves the original opportunity cost logic implemented in earlier versions of STEPS. This method is labelled “Existing opportunity cost”.
+      It remains unchanged to maintain continuity with earlier costing work. Its parameters and assumptions are described in the Settings section of the tool.
+    </p>
+
+    <h3>5.2 Salary based opportunity cost (additional)</h3>
+    <p>
+      The salary based method is an additional conservative estimate that values time diverted from regular duties for faculty, coordinators, and participants.
+      It is an indirect, non cash cost. It should be interpreted as the value of staff time that could have been used for routine service delivery or other programme work.
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Input</th>
+          <th>Default</th>
+          <th>Meaning</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Average monthly salary – Faculty (INR)</td>
+          <td>200,000</td>
+          <td>Monthly salary value used to price faculty time</td>
+        </tr>
+        <tr>
+          <td>Average monthly salary – Coordinator (INR)</td>
+          <td>70,000</td>
+          <td>Monthly salary value used to price coordination time</td>
+        </tr>
+        <tr>
+          <td>Average monthly salary – Participant (INR)</td>
+          <td>100,000</td>
+          <td>Monthly salary value used to price participant time</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>5.2.1 Salary based formulas</h3>
+    <p>
+      The salary method depends on programme modality and the division of time between contact days (in person sessions) and non contact time.
+      The tool treats one month as 30 days for the conversion between days and months.
+    </p>
+
+    <p><strong>Fully in person programmes</strong></p>
+    <p class="mono">
+      OC<sub>r</sub> = MonthlySalary<sub>r</sub> × ProgrammeDuration<sub>months</sub> × N<sub>r</sub>
+    </p>
+    <p class="muted">
+      r is faculty, coordinator, or participant. N<sub>r</sub> is the number of people in that role required for the cohort.
+    </p>
+
+    <p><strong>Blended programmes</strong></p>
+    <p>
+      For participants and coordinators, salary is counted only for contact days.
+      For faculty, salary is counted for contact days plus 50% of the non contact duration, reflecting preparation, review, and remote support.
+    </p>
+
+    <p class="mono">
+      OC<sub>participant/coordinator</sub> = MonthlySalary × (ContactDays / 30) × N
+    </p>
+
+    <p class="mono">
+      OC<sub>faculty</sub> = MonthlySalary<sub>faculty</sub> × [(ContactDays / 30) + 0.5 × (TotalDays − ContactDays) / 30] × N<sub>faculty</sub>
+    </p>
+
+    <h3>5.3 Worked example: salary based opportunity cost</h3>
+    <p>
+      Consider a blended programme lasting 90 total days with 15 contact days. Suppose the cohort uses 4 faculty, 2 coordinators, and 40 participants.
+      Using the default salaries, the participant opportunity cost is:
+      100,000 × (15/30) × 40 = 100,000 × 0.5 × 40 = 2,000,000 INR.
+      Coordinator opportunity cost is:
+      70,000 × (15/30) × 2 = 70,000 × 0.5 × 2 = 70,000 INR.
+      Faculty opportunity cost is:
+      200,000 × [(15/30) + 0.5 × (75/30)] × 4.
+      This equals 200,000 × [0.5 + 0.5 × 2.5] × 4 = 200,000 × 1.75 × 4 = 1,400,000 INR.
+      Total salary based opportunity cost for the cohort is 3,470,000 INR.
+    </p>
+
+    <h2>6. Total economic cost, net benefit, and BCR</h2>
+    <p>
+      Total economic cost is the sum of financial cost and both opportunity cost components:
+    </p>
+
+    <p class="mono"><strong>Total economic cost = Financial cost + Existing opportunity cost + Salary based opportunity cost</strong></p>
+
+    <p>
+      The epidemiological benefit is computed using the benefit model and inputs in Settings and the endorsement rate in the scenario.
+      Net benefit and BCR are:
+    </p>
+
+    <p class="mono"><strong>Net benefit = Epidemiological benefit − Total economic cost</strong></p>
+    <p class="mono"><strong>BCR = Epidemiological benefit / Total economic cost</strong></p>
+
+    <h3>6.1 If you want to change the benefit metric</h3>
+    <p>
+      If stakeholders wish to adopt a different benefit metric, the clean approach is to keep the training output calculation unchanged
+      and modify the Settings parameters that translate trainees into benefits. For example, a user could replace a willingness to pay based value
+      with an avoided outbreak cost metric, or adjust the assumed benefit per trainee. The tool will immediately recompute net benefit and BCR.
+      When changing the benefit model, users should document the new assumptions in the Notes fields so exports remain auditable.
+    </p>
+
+    <h2>7. Feasibility constraints and what the feasibility filter does</h2>
+    <p>
+      STEPS includes feasibility checks for mentors and hubs. Feasibility does not change model calculations. It only affects how scenarios are flagged and filtered
+      in the Top options panels and prompt generation. When “Show feasible only” is selected, the ranking list hides scenarios that exceed available mentors or hubs.
+    </p>
+
+    <h2>8. National simulation and baseline vs scenario table</h2>
+    <p>
+      The National simulation tab shows baseline values, scenario values, and incremental deltas. The scenario is selected using “Compare baseline with”.
+      Users can also add scenarios to a quick access list for easier switching. The table always compares the selected scenario against the fixed baseline.
+    </p>
+
+    <p>
+      Remaining to reach target (Intermediate + Advanced) follows the Planner stock logic:
+    </p>
+    <p class="mono"><strong>Baseline remaining = Target stock − Current stock</strong></p>
+    <p class="mono"><strong>Scenario remaining = Target stock − (Current stock + Scenario Intermediate+Advanced graduates)</strong></p>
+
+    <h2>9. Planner pathway generation</h2>
+    <p>
+      The Planner “Generate pathways” feature uses the target stock and current stock to compute how many Intermediate and Advanced graduates are required per year
+      to close the gap over the selected horizon. It then uses the configured cohort sizes and endorsement rates to suggest plausible cohort schedules.
+      The pathway outputs are descriptive and do not override the saved scenarios. They are intended to support planning conversations.
+    </p>
+
+    <h2>10. Copilot and ChatGPT prompts</h2>
+    <p>
+      The Copilot prompts tab generates two prompts: an existing briefing prompt and a 3 to 5 page policy brief prompt. Copy buttons place the prompt into the clipboard.
+      Refresh updates the prompt to reflect current baseline and scenario values. Download creates a text file containing the prompts. If the user selects Open Copilot or Open ChatGPT,
+      the tool opens the platform in a new tab and copies the prompt first so the user can paste immediately.
+    </p>
+
+    <h2>11. Exports</h2>
+    <p>
+      STEPS exports Word and Excel files directly in the browser. Word exports are designed for non technical audiences and use plain language interpretations in continuous prose.
+      Excel exports contain the scenario tables used for ranking and sensitivity summaries.
+      Exports pull the same numbers displayed in the UI. If an export does not match the UI, it indicates a bug and should be reported for correction.
+    </p>
+
+    <h2>12. Audit and reproducibility tips</h2>
+    <p>
+      For auditability, users should keep a record of (i) Settings values, (ii) scenario configurations, and (iii) exported reports.
+      When presenting to stakeholders, it is recommended to state whether totals are financial or economic, and to note whether the salary based opportunity cost
+      is included. STEPS includes both opportunity costs in economic totals by design.
+    </p>
+
+    <div class="box">
+      <p><strong>Support</strong></p>
+      <p class="muted">
+        This appendix is designed to allow programme teams to use STEPS without technical assistance. If users wish to update the benefit model or introduce additional cost modules,
+        the recommended approach is to keep the training output logic unchanged and adjust only the Settings inputs and documented formulas.
+      </p>
+    </div>
+  </main>
+</body>
+</html>
